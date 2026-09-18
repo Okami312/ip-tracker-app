@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import imgMobile from "../src/images/pattern-bg-mobile.png";
-import imgDesktop from "../src/images/pattern-bg-desktop.png";
+import imgMobile from "./images/pattern-bg-mobile.png";
+import imgDesktop from "./images/pattern-bg-desktop.png";
 import CoordsPanel from "./components/CoordsPanel";
 import Loading from "./components/Loading";
 import Map from "./components/Map";
@@ -11,18 +11,18 @@ const App = () => {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchInput, setSearchInput] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
   const [isValid, setIsValid] = useState(null);
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!searchInput) {
-        setIsLoading(false);
+      if (!submittedQuery) {
         return;
       }
       setIsLoading(true);
       setIsError(false);
-      const url = `https://free.freeipapi.com/api/json/${searchInput}`;
+      const url = `https://free.freeipapi.com/api/json/${submittedQuery}`;
       try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -31,7 +31,6 @@ const App = () => {
           return;
         }
         const result = await response.json();
-        console.log(result);
         setData(result);
       } catch (error) {
         setIsError(true);
@@ -41,7 +40,7 @@ const App = () => {
     };
 
     fetchData();
-  }, [searchInput]);
+  }, [submittedQuery]);
 
   if (isLoading) {
     return <Loading />;
@@ -70,6 +69,12 @@ const App = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const trimmed = searchInput.trim();
+    if (!trimmed || !regex.test(trimmed)) {
+      setIsValid(false);
+      return;
+    }
+    setSubmittedQuery(trimmed);
   };
 
   return (
@@ -103,4 +108,3 @@ const App = () => {
 
 export default App;
 // https://geo.ipify.org/api/v2/country,city?apiKey=YOUR_API_KEY&ipAddress=8.8.8.8
-// pls update the project

@@ -1,4 +1,11 @@
 const CoordsPanel = ({ data }) => {
+  const location = data
+    ? [data.cityName, data.regionName, data.countryName]
+        .filter(Boolean)
+        .join(", ")
+    : "";
+  const timezone = data?.timeZones?.[0];
+
   return (
     <article>
       <div>
@@ -7,15 +14,15 @@ const CoordsPanel = ({ data }) => {
       </div>
       <div className="border">
         <p>Location</p>
-        <h5>{data?.location}</h5>
+        <h5>{location}</h5>
       </div>
       <div className="border">
         <p>Timezone</p>
-        <h5>{data?.timezones}</h5>
+        <h5>{timezone}</h5>
       </div>
       <div className="border">
         <p>ISP</p>
-        <h5>{data?.isp}</h5>
+        <h5>{data?.asnOrganization}</h5>
       </div>
     </article>
   );

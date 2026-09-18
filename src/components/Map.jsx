@@ -23,7 +23,7 @@ const Map = ({ data }) => {
 
   const position = [lat, lng];
 
-  const customIcon = L.icon({
+  const customIcon = L.divIcon({
     className: "leaflet-icon",
     html: `<div class="icon-wrapper"><img src="${marker}" alt="Marker" /></div>`,
     iconSize: [32, 45],
