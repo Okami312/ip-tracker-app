@@ -17,12 +17,12 @@ const App = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!submittedQuery) {
-        return;
-      }
       setIsLoading(true);
       setIsError(false);
-      const url = `https://free.freeipapi.com/api/json/${submittedQuery}`;
+      const apiKey = import.meta.env.VITE_IPIFY_API_KEY;
+      const url = submittedQuery
+        ? `https://geo.ipify.org/api/v2/country,city?apiKey=${apiKey}&ipAddress=${submittedQuery}`
+        : `https://geo.ipify.org/api/v2/country,city?apiKey=${apiKey}`;
       try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -31,7 +31,18 @@ const App = () => {
           return;
         }
         const result = await response.json();
-        setData(result);
+        setData({
+          ipAddress: result.ip,
+          latitude: result.location?.lat,
+          longitude: result.location?.lng,
+          cityName: result.location?.city,
+          regionName: result.location?.region,
+          countryName: result.location?.country,
+          timeZones: result.location?.timezone
+            ? [result.location.timezone]
+            : [],
+          asnOrganization: result.isp,
+        });
       } catch (error) {
         setIsError(true);
         console.log(error);
@@ -107,4 +118,3 @@ const App = () => {
 };
 
 export default App;
-// https://geo.ipify.org/api/v2/country,city?apiKey=YOUR_API_KEY&ipAddress=8.8.8.8

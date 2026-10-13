@@ -11,6 +11,13 @@ const MapView = ({ coords }) => {
   useEffect(() => {
     if (coords[0] && coords[1]) {
       map.setView(coords, 13);
+      const handleResize = () => map.invalidateSize();
+      const timer = setTimeout(handleResize, 0);
+      window.addEventListener("resize", handleResize);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener("resize", handleResize);
+      };
     }
   }, [coords, map]);
   return null;
