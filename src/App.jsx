@@ -5,14 +5,8 @@ import CoordsPanel from "./components/CoordsPanel";
 import Map from "./components/Map";
 import SearchBar from "./components/SearchBar";
 import { LoadingStatus, useDelayedLoading } from "./components/Loading";
+import { ipv4Regex, isValidQuery } from "./utils/validateQuery";
 import "./App.css";
-
-const ipv4Regex =
-  /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/;
-const domainRegex =
-  /^([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-const isValidQuery = (value) =>
-  ipv4Regex.test(value) || domainRegex.test(value);
 
 const App = () => {
   const [data, setData] = useState(null);

@@ -10,22 +10,18 @@ const MapView = ({ coords }) => {
   const map = useMap();
 
   useEffect(() => {
-    if (coords[0] && coords[1]) {
-      map.setView(coords, 13);
-      const handleResize = () => map.invalidateSize();
-      const timer = setTimeout(handleResize, 0);
-      window.addEventListener("resize", handleResize);
-      return () => {
-        clearTimeout(timer);
-        window.removeEventListener("resize", handleResize);
-      };
-    }
+    map.setView(coords, 13);
+    const handleResize = () => map.invalidateSize();
+    const timer = setTimeout(handleResize, 0);
+    window.addEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", handleResize);
+    };
   }, [coords, map]);
   return null;
 };
 
-// On touch devices the map stays inert until tapped, so it never hijacks
-// page scrolling; tapping anywhere outside it locks it again.
 const TapToActivate = () => {
   const map = useMap();
 
@@ -61,7 +57,7 @@ const Map = ({ data, isLoading }) => {
   const lat = data?.latitude;
   const lng = data?.longitude;
   const skeleton = isLoading && <MapSkeleton />;
-  if (!lat || !lng) return skeleton || null;
+  if (lat == null || lng == null) return skeleton || null;
 
   const position = [lat, lng];
 
