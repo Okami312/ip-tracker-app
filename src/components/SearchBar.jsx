@@ -5,9 +5,15 @@ const SearchBar = ({
   onSearch,
   handleSubmit,
   isValid,
+  errorMessage,
   handleChange,
   isLoading,
 }) => {
+  const message =
+    isValid === false
+      ? "Please enter a valid IP address or domain name."
+      : errorMessage;
+
   return (
     <form className="input-search" onSubmit={handleSubmit}>
       <input
@@ -28,9 +34,9 @@ const SearchBar = ({
           <img src={ArrowImg} alt="" className="search-arrow" />
         )}
       </button>
-      {isValid !== null && (
-        <p className="error-message">
-          {isValid ? "" : "Please enter a valid IP address or domain name."}
+      {message && (
+        <p className="error-message" role="alert">
+          {message}
         </p>
       )}
     </form>

@@ -9,7 +9,8 @@ Built with:
 - [React 19](https://react.dev/) + [Vite](https://vite.dev/)
 - [Leaflet](https://leafletjs.com/) / [react-leaflet](https://react-leaflet.js.org/) for the map
 - [ipify Geolocation API](https://geo.ipify.org/) for IP geolocation data
-- [Jest](https://jestjs.io/) + [Testing Library](https://testing-library.com/) for tests
+- [Jest](https://jestjs.io/) + [Testing Library](https://testing-library.com/) for unit and integration tests
+- [Playwright](https://playwright.dev/) for end-to-end and visual tests
 
 ## Running locally
 
@@ -58,6 +59,28 @@ Notes:
 - A 100% threshold for statements, branches, functions and lines is enforced by
   `npm run test:coverage`, so the command fails if coverage drops.
 
+### End-to-end and visual tests
+
+Playwright tests live in `e2e/` and run in Chromium at three viewports that match the
+Figma frames: mobile (375px), tablet (768px) and desktop (1440px). The ipify API and the
+OpenStreetMap tiles are stubbed, so the tests are deterministic and need no API key.
+
+```bash
+npx playwright install chromium         # once, downloads the browser
+npm run test:e2e                        # starts (or reuses) the dev server on :5173
+npm run test:e2e -- --update-snapshots  # create or refresh the screenshot baselines
+```
+
+- **`layout.spec.js`** — banner height, search bar and card size and position, map
+  placement, card overlap, centering and no horizontal scrolling, per viewport.
+- **`map.spec.js`** — the pin tip sits on the map center, the IP popup, zoom buttons only
+  for a mouse pointer, and tap-to-activate on touch viewports.
+- **`search.spec.js`** — lookup on load, IP and domain searches, validation, inline API
+  and network errors, loading skeletons and the cache.
+- **`visual.spec.js`** — full-page screenshots of the result, long values, the loading
+  skeleton and the error states. Baselines are platform specific, so generate them on the
+  machine (or CI image) that runs the tests.
+
 ## Strong points
 
 - **Clean component split** — `SearchBar`, `CoordsPanel`, `Map`, and `Loading` each
@@ -74,8 +97,10 @@ Notes:
 
 - **IPv6 not supported** — the validation regex accepts dotted IPv4 addresses and
   domain names, but IPv6 addresses are rejected.
-- **No debouncing/caching** — every valid submission hits the live API directly, with
-  no caching of recent lookups. A new search cancels the one still in flight, but
-  repeated submissions are not rate limited.
-- **No end-to-end or visual tests** — unit and integration tests cover the logic, but
-  the responsive layouts and the real Leaflet map are only checked manually in a browser.
+- **In-memory cache only** — results are cached for five minutes (up to 20 lookups),
+  but the cache is lost on reload and is not shared between tabs.
+- **Client-side rate limiting only** — searches for different queries are spaced at least
+  one second apart and a burst collapses into the last one, but this is not a guarantee
+  against the API's own limits.
+- **Visual baselines are per platform** — the screenshot snapshots must be generated on
+  the machine that runs them, and they are not run in CI yet.

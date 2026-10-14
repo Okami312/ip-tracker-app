@@ -28,3 +28,16 @@ coverage
 *.sw?
 
 *.bak
+*.pem
+*.key
+.npmrc
+.eslintcache
+*.tsbuildinfo
+.vite
+Thumbs.db
+.vercel
+.netlify
+.claude/settings.local.json
+playwright-report
+test-results
+blob-report

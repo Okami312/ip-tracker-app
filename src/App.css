@@ -76,13 +76,15 @@ main {
   height: 58px;
   margin: 0 auto 48px;
   border-radius: 10px;
-  overflow: hidden;
 }
 
 .input-search input {
   flex: 1;
   min-width: 0;
   border: none;
+  border-radius: inherit;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
   outline: none;
   padding: 0 1.5rem;
   font-size: 18px;
@@ -99,7 +101,9 @@ main {
   width: 56px;
   height: 100%;
   border: none;
-  border-radius: 0;
+  border-radius: inherit;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
   background-color: #000;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -116,12 +120,19 @@ main {
 
 .error-message {
   position: absolute;
-  left: 1.5rem;
-  bottom: -1.4rem;
+  top: calc(100% + 2px);
+  left: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   margin: 0;
-  color: #ff5252;
-  font-size: 0.8rem;
-  font-style: italic;
+  padding: 3px 10px;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #d93025;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: left;
 }
 
 @media (min-width: 768px) {

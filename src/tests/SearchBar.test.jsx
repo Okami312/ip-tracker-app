@@ -65,6 +65,27 @@ describe("SearchBar", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows a request error message as an alert", () => {
+    setup({ errorMessage: "Network error." });
+
+    expect(screen.getByRole("alert")).toHaveTextContent("Network error.");
+  });
+
+  it("prefers the validation message over an older request error", () => {
+    setup({ isValid: false, errorMessage: "Network error." });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Please enter a valid IP address or domain name.",
+    );
+    expect(screen.queryByText("Network error.")).not.toBeInTheDocument();
+  });
+
+  it("shows no alert without a validation or request error", () => {
+    setup({ isValid: true, errorMessage: null });
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("disables the button and swaps the arrow for a spinner while loading", async () => {
     const { handleSubmit } = setup({ isLoading: true });
     const button = screen.getByRole("button", { name: "Search" });

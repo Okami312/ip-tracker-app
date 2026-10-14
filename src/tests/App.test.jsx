@@ -2,6 +2,12 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "../App";
 
+jest.mock("../utils/lookupLimits", () => ({
+  CACHE_TTL_MS: 300000,
+  CACHE_MAX_ENTRIES: 20,
+  MIN_REQUEST_INTERVAL_MS: 0,
+}));
+
 jest.mock("../components/Map", () => ({
   __esModule: true,
   default: ({ data }) =>
@@ -133,6 +139,54 @@ describe("App", () => {
     ).toBeInTheDocument();
   });
 
+  it("keeps the page and the last result visible when a search fails", async () => {
+    render(<App />);
+    await screen.findByText("1.1.1.1");
+    fetch.mockImplementationOnce(() =>
+      respond({ messages: "Too many requests." }, false),
+    );
+
+    await search("8.8.8.8");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Too many requests.",
+    );
+    expect(
+      screen.getByPlaceholderText("Search for any IP address or domain"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("1.1.1.1")).toBeInTheDocument();
+    expect(screen.getByTestId("map")).toBeInTheDocument();
+  });
+
+  it("clears the error when the next search succeeds", async () => {
+    render(<App />);
+    await screen.findByText("1.1.1.1");
+    fetch.mockImplementationOnce(() =>
+      respond({ messages: "Too many requests." }, false),
+    );
+    await search("8.8.8.8");
+    await screen.findByRole("alert");
+    fetch.mockImplementationOnce(() => respond(apiResult({ ip: "9.9.9.9" })));
+
+    await search("9.9.9.9");
+
+    expect(await screen.findByText("9.9.9.9")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("shows the search bar with an empty card when the first lookup fails", async () => {
+    fetch.mockImplementationOnce(() => Promise.reject(new TypeError("fail")));
+
+    render(<App />);
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Search for any IP address or domain"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("IP Address")).toBeInTheDocument();
+    expect(screen.queryByTestId("map")).not.toBeInTheDocument();
+  });
+
   it("shows a network error when the request fails", async () => {
     fetch.mockImplementationOnce(() => Promise.reject(new TypeError("fail")));
 
@@ -143,6 +197,74 @@ describe("App", () => {
         "Network error. Please check your connection and try again.",
       ),
     ).toBeInTheDocument();
+  });
+
+  describe("caching", () => {
+    const lookup = (ip) => () => respond(apiResult({ ip }));
+
+    it("serves a repeated search from the cache without a request", async () => {
+      render(<App />);
+      await screen.findByText("1.1.1.1");
+      fetch
+        .mockImplementationOnce(lookup("8.8.8.8"))
+        .mockImplementationOnce(lookup("9.9.9.9"));
+
+      await search("8.8.8.8");
+      await screen.findByText("8.8.8.8");
+      await search("9.9.9.9");
+      await screen.findByText("9.9.9.9");
+      expect(fetch).toHaveBeenCalledTimes(3);
+
+      await search("8.8.8.8");
+
+      expect(await screen.findByText("8.8.8.8")).toBeInTheDocument();
+      expect(fetch).toHaveBeenCalledTimes(3);
+    });
+
+    it("treats a domain case-insensitively when caching", async () => {
+      render(<App />);
+      await screen.findByText("1.1.1.1");
+
+      await search("Example.com");
+      await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+      await search("example.COM");
+      await search("example.com");
+
+      expect(fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it("does not cache a failed lookup, so the same search can retry", async () => {
+      render(<App />);
+      await screen.findByText("1.1.1.1");
+      fetch.mockImplementationOnce(() =>
+        respond({ messages: "Too many requests." }, false),
+      );
+      await search("8.8.8.8");
+      await screen.findByRole("alert");
+      fetch.mockImplementationOnce(lookup("8.8.8.8"));
+
+      await search("8.8.8.8");
+
+      expect(await screen.findByText("8.8.8.8")).toBeInTheDocument();
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      expect(fetch).toHaveBeenCalledTimes(3);
+    });
+
+    it("clears an old error when a cached result is shown", async () => {
+      render(<App />);
+      await screen.findByText("1.1.1.1");
+      fetch.mockImplementationOnce(lookup("8.8.8.8"));
+      await search("8.8.8.8");
+      await screen.findByText("8.8.8.8");
+      fetch.mockImplementationOnce(() => Promise.reject(new TypeError("x")));
+      await search("9.9.9.9");
+      await screen.findByRole("alert");
+
+      await search("8.8.8.8");
+
+      expect(await screen.findByText("8.8.8.8")).toBeInTheDocument();
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
   });
 
   describe("overlapping searches", () => {
@@ -197,6 +319,24 @@ describe("App", () => {
 
       expect(await screen.findByText("9.9.9.9")).toBeInTheDocument();
       expect(screen.queryByText("8.8.8.8")).not.toBeInTheDocument();
+    });
+
+    it("ignores a duplicate submit while that query is in flight", async () => {
+      const calls = abortable();
+      render(<App />);
+      await waitFor(() => expect(calls).toHaveLength(1));
+      calls[0].resolve(apiResult());
+      await screen.findByText("1.1.1.1");
+
+      await search("8.8.8.8");
+      await waitFor(() => expect(calls).toHaveLength(2));
+      await userEvent.type(
+        screen.getByPlaceholderText("Search for any IP address or domain"),
+        "{Enter}",
+      );
+
+      expect(calls).toHaveLength(2);
+      expect(calls[1].signal.aborted).toBe(false);
     });
 
     it("does not show an error for an aborted request", async () => {
