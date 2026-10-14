@@ -38,6 +38,7 @@ const App = () => {
           cityName: result.location?.city,
           regionName: result.location?.region,
           countryName: result.location?.country,
+          postalCode: result.location?.postalCode,
           timeZones: result.location?.timezone
             ? [result.location.timezone]
             : [],
