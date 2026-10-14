@@ -1,36 +1,39 @@
-const CoordsPanel = ({ data }) => {
+import { SkeletonLine } from "./Loading";
+
+const CoordsPanel = ({ data, isLoading }) => {
   const location = data
     ? [data.cityName, data.regionName, data.countryName]
         .filter(Boolean)
         .join(", ")
     : "";
-  const timezone = data?.timeZones?.[0];
+  const timezone = data?.timezone ? `UTC ${data.timezone}` : "";
 
   return (
-    <article>
+    <article aria-busy={isLoading}>
       <div>
         <p>IP Address</p>
-        <h5>{data?.ipAddress}</h5>
+        <h5>{isLoading ? <SkeletonLine /> : data?.ipAddress}</h5>
       </div>
-      <div className="border">
+      <div>
         <p>Location</p>
         <h5>
-          {location}
-          {data?.postalCode && (
+          {isLoading ? (
+            <SkeletonLine />
+          ) : (
             <>
-              <br />
-              {data.postalCode}
+              {location}
+              {data?.postalCode && ` ${data.postalCode}`}
             </>
           )}
         </h5>
       </div>
-      <div className="border">
+      <div>
         <p>Timezone</p>
-        <h5>{timezone}</h5>
+        <h5>{isLoading ? <SkeletonLine /> : timezone}</h5>
       </div>
-      <div className="border">
+      <div>
         <p>ISP</p>
-        <h5>{data?.asnOrganization}</h5>
+        <h5>{isLoading ? <SkeletonLine /> : data?.asnOrganization}</h5>
       </div>
     </article>
   );

@@ -1,6 +1,13 @@
 import ArrowImg from "../images/icon-arrow.svg";
+import { SearchSpinner } from "./Loading";
 
-const SearchBar = ({ onSearch, handleSubmit, isValid, handleChange }) => {
+const SearchBar = ({
+  onSearch,
+  handleSubmit,
+  isValid,
+  handleChange,
+  isLoading,
+}) => {
   return (
     <form className="input-search" onSubmit={handleSubmit}>
       <input
@@ -9,8 +16,17 @@ const SearchBar = ({ onSearch, handleSubmit, isValid, handleChange }) => {
         value={onSearch}
         placeholder="Search for any IP address or domain"
       />
-      <button className="search-btn" type="submit">
-        <img src={ArrowImg} alt="search" className="search-arrow" />
+      <button
+        className="search-btn"
+        type="submit"
+        disabled={isLoading}
+        aria-label="Search"
+      >
+        {isLoading ? (
+          <SearchSpinner />
+        ) : (
+          <img src={ArrowImg} alt="" className="search-arrow" />
+        )}
       </button>
       {isValid !== null && (
         <p className="error-message">

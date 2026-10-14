@@ -1,0 +1,101 @@
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes map-pulse {
+  0%,
+  100% {
+    background-color: rgba(216, 216, 216, 0.9);
+  }
+  50% {
+    background-color: rgba(216, 216, 216, 0.7);
+  }
+}
+
+@keyframes pin-bounce {
+  0%,
+  100% {
+    transform: translate(-50%, -100%);
+  }
+  50% {
+    transform: translate(-50%, calc(-100% - 14px));
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.skeleton-line {
+  display: block;
+  width: min(100%, 9em);
+  height: 0.9em;
+  border-radius: 6px;
+  background-color: #e4e4e4;
+  animation: skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+.leaflet-container.map-skeleton {
+  z-index: 0;
+  background-color: rgba(216, 216, 216, 0.9);
+  animation: map-pulse 1.2s ease-in-out infinite;
+}
+
+.leaflet-container.map-skeleton::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 46px;
+  height: 55px;
+  background: url("../images/icon-location.svg") center / contain no-repeat;
+  animation: pin-bounce 0.9s ease-in-out infinite;
+}
+
+.search-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@media (max-width: 767px) {
+  .skeleton-line {
+    margin: 0 auto;
+  }
+}
+
+.search-btn:disabled {
+  cursor: progress;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line,
+  .leaflet-container.map-skeleton,
+  .leaflet-container.map-skeleton::after,
+  .search-spinner {
+    animation: none;
+  }
+}
