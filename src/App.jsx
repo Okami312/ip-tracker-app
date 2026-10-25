@@ -41,9 +41,17 @@ const App = () => {
         return;
       }
 
+      const apiKey = import.meta.env.VITE_IPIFY_API_KEY;
+      if (!apiKey) {
+        setErrorMessage(
+          "Missing API key. Set VITE_IPIFY_API_KEY in your .env file and restart the dev server.",
+        );
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       setErrorMessage(null);
-      const apiKey = import.meta.env.VITE_IPIFY_API_KEY;
       const param = query
         ? `&${ipv4Regex.test(query) ? "ipAddress" : "domain"}=${query}`
         : "";
