@@ -5,7 +5,8 @@ import CoordsPanel from "./components/CoordsPanel";
 import Map from "./components/Map";
 import SearchBar from "./components/SearchBar";
 import { LoadingStatus, useDelayedLoading } from "./components/Loading";
-import { ipv4Regex, isValidQuery } from "./utils/validateQuery";
+import { isIpAddress, isValidQuery } from "./utils/validateQuery";
+import { normalizeQuery } from "./utils/normalizeQuery";
 import { createLookupCache } from "./utils/lookupCache";
 import {
   CACHE_MAX_ENTRIES,
@@ -53,7 +54,7 @@ const App = () => {
       setIsLoading(true);
       setErrorMessage(null);
       const param = query
-        ? `&${ipv4Regex.test(query) ? "ipAddress" : "domain"}=${query}`
+        ? `&${isIpAddress(query) ? "ipAddress" : "domain"}=${query}`
         : "";
       const url = `https://geo.ipify.org/api/v2/country,city?apiKey=${apiKey}${param}`;
       try {
@@ -104,22 +105,23 @@ const App = () => {
   const handleChange = (e) => {
     const value = e.target.value;
     setSearchInput(value);
-    if (value.trim() === "") {
+    const query = normalizeQuery(value);
+    if (query === "") {
       setIsValid(null);
     } else {
-      setIsValid(isValidQuery(value.trim()));
+      setIsValid(isValidQuery(query));
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const trimmed = searchInput.trim();
-    if (!trimmed || !isValidQuery(trimmed)) {
+    const query = normalizeQuery(searchInput);
+    if (!query || !isValidQuery(query)) {
       setIsValid(false);
       return;
     }
-    if (isLoading && trimmed === request.query) return;
-    setRequest(({ id }) => ({ query: trimmed, id: id + 1 }));
+    if (isLoading && query === request.query) return;
+    setRequest(({ id }) => ({ query, id: id + 1 }));
   };
 
   return (

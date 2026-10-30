@@ -39,7 +39,8 @@ const search = async (value) => {
     "Search for any IP address or domain",
   );
   await userEvent.clear(input);
-  await userEvent.type(input, `${value}{Enter}`);
+  // userEvent reads "[" and "{" as key descriptors, so double them to type them
+  await userEvent.type(input, `${value.replace(/[[{]/g, "$&$&")}{Enter}`);
 };
 
 beforeAll(() => {
@@ -76,6 +77,29 @@ describe("App", () => {
     expect(fetch.mock.calls[1][0]).toContain("&ipAddress=8.8.8.8");
   });
 
+  it("searches by ipAddress for an IPv6 query", async () => {
+    render(<App />);
+    await screen.findByText("1.1.1.1");
+    fetch.mockImplementationOnce(() =>
+      respond(apiResult({ ip: "2606:4700:4700::1111" })),
+    );
+
+    await search("2606:4700:4700::1111");
+
+    expect(await screen.findByText("2606:4700:4700::1111")).toBeInTheDocument();
+    expect(fetch.mock.calls[1][0]).toContain("&ipAddress=2606:4700:4700::1111");
+  });
+
+  it("canonicalizes an IPv6 query before requesting it", async () => {
+    render(<App />);
+    await screen.findByText("1.1.1.1");
+
+    await search("  [2001:0DB8:0000:0000:0000:0000:0000:0001]  ");
+
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    expect(fetch.mock.calls[1][0]).toContain("&ipAddress=2001:db8::1");
+  });
+
   it("searches by domain for a hostname query", async () => {
     render(<App />);
     await screen.findByText("1.1.1.1");
@@ -106,6 +130,30 @@ describe("App", () => {
       screen.getByText("Please enter a valid IP address or domain name."),
     ).toBeInTheDocument();
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("accepts a typed IPv6 address, bracketed or not, as valid input", async () => {
+    render(<App />);
+    await screen.findByText("1.1.1.1");
+    const input = screen.getByPlaceholderText(
+      "Search for any IP address or domain",
+    );
+    const message = "Please enter a valid IP address or domain name.";
+
+    await userEvent.clear(input);
+    await userEvent.type(input, "2001:db8::1");
+    expect(screen.queryByText(message)).not.toBeInTheDocument();
+
+    await userEvent.clear(input);
+    await userEvent.type(input, "[[2001:db8::1]");
+    expect(screen.queryByText(message)).not.toBeInTheDocument();
+
+    await userEvent.clear(input);
+    await userEvent.type(input, "2001:db8::1::2");
+    expect(screen.getByText(message)).toBeInTheDocument();
+
+    await userEvent.clear(input);
+    expect(screen.queryByText(message)).not.toBeInTheDocument();
   });
 
   it("ignores an empty submit", async () => {
@@ -230,6 +278,22 @@ describe("App", () => {
       await search("example.COM");
       await search("example.com");
 
+      expect(fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it("serves another spelling of the same IPv6 address from the cache", async () => {
+      render(<App />);
+      await screen.findByText("1.1.1.1");
+      fetch.mockImplementationOnce(lookup("2001:db8::1"));
+
+      await search("2001:db8::1");
+      await screen.findByText("2001:db8::1");
+      expect(fetch).toHaveBeenCalledTimes(2);
+
+      await search("2001:0DB8:0000:0000:0000:0000:0000:0001");
+      await search("[2001:db8:0:0::1]");
+
+      expect(await screen.findByText("2001:db8::1")).toBeInTheDocument();
       expect(fetch).toHaveBeenCalledTimes(2);
     });
 

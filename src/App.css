@@ -238,7 +238,6 @@ article h5 {
     min-width: 0;
   }
 
-  article div:nth-child(1),
   article div:nth-child(3) {
     flex-shrink: 0;
   }
