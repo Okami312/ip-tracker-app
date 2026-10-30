@@ -1,4 +1,5 @@
 #root {
+  width: 100%;
   margin: 0 auto;
   text-align: center;
 }
@@ -148,116 +149,115 @@ main {
   }
 }
 
-article {
+/* Info card — sizes from the Figma "Info Container" frames */
+.info-card {
   position: relative;
   z-index: 1;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  width: 90%;
+  width: calc(100% - 48px);
   max-width: 1111px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 32px 24px;
   background-color: #fff;
   border-radius: 15px;
-  box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.3);
-  text-align: left;
+  box-shadow: 0 50px 25px rgba(0, 0, 0, 0.1);
 }
 
-article p {
-  margin: 0 0 0.5rem;
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 0;
+  text-align: center;
+}
+
+.info-item {
+  position: relative;
+  min-width: 0;
+}
+
+.info-label {
+  margin: 0 0 8px;
   color: #969696;
   font-size: 10px;
   font-weight: 700;
+  line-height: 1;
   letter-spacing: 1.75px;
   white-space: nowrap;
 }
 
-article h5 {
+.info-value {
   margin: 0;
-  color: #2b2b2b;
+  color: #2c2c2c;
   font-size: 20px;
   font-weight: 500;
-  line-height: 1.2;
-  word-break: break-word;
+  line-height: 1;
+  letter-spacing: -0.25px;
+  overflow-wrap: anywhere;
 }
 
-@media (min-width: 768px) and (max-width: 1023px) {
-  article {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    column-gap: 48px;
-    row-gap: 2rem;
-    width: 555px;
-    margin: 0 auto;
-    padding: 2rem;
+/* Divider: a 1px line centered in the 65px gap (32px + 1px + 32px) */
+@media (min-width: 768px) {
+  .info-card {
+    padding: 32px;
   }
 
-  article div {
-    position: relative;
+  .info-list {
+    text-align: left;
   }
 
-  article div:nth-child(even)::before {
-    content: "";
+  .info-label {
+    margin-bottom: 16px;
+    font-size: 12px;
+  }
+
+  .info-item::before {
     position: absolute;
-    left: -32px;
     top: 0;
     bottom: 0;
+    left: -33px;
     width: 1px;
     background-color: rgba(0, 0, 0, 0.15);
   }
+}
 
-  article p {
-    margin-bottom: 16px;
-    font-size: 12px;
-    line-height: 1;
+@media (min-width: 768px) and (max-width: 1023px) {
+  .info-card {
+    width: 555px;
   }
 
-  article h5 {
-    line-height: 1;
-    letter-spacing: -0.25px;
+  .info-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px 65px;
+  }
+
+  .info-item:nth-child(even)::before {
+    content: "";
   }
 }
 
 @media (min-width: 1024px) {
-  article {
-    flex-direction: row;
-    align-items: stretch;
-    justify-content: flex-start;
+  .info-card {
     width: 1111px;
     max-width: calc(100% - 48px);
-    gap: 32px;
-    margin: 0 auto;
-    padding: 2rem;
-    box-shadow: 0 50px 25px rgba(0, 0, 0, 0.1);
   }
 
-  article div {
-    flex: 1 1 auto;
-    min-width: 0;
+  .info-list {
+    flex-direction: row;
+    gap: 65px;
   }
 
-  article div:nth-child(1),
-  article div:nth-child(3) {
-    flex-shrink: 0;
+  .info-item {
+    flex: 1 1 0;
   }
 
-  article div:not(:first-child) {
-    padding-left: 32px;
-    border-left: 1px solid rgba(0, 0, 0, 0.15);
+  .info-item + .info-item::before {
+    content: "";
   }
 
-  article p {
-    margin-bottom: 16px;
-    font-size: 12px;
-    line-height: 1;
-  }
-
-  article h5 {
+  .info-value {
     font-size: 26px;
-    line-height: 1;
-    letter-spacing: -0.25px;
   }
 }
 
@@ -311,10 +311,6 @@ article h5 {
 }
 
 @media (max-width: 767px) {
-  #root {
-    width: 100%;
-  }
-
   main {
     max-width: none;
   }
@@ -334,21 +330,6 @@ article h5 {
 
   .search-btn {
     width: 58px;
-  }
-
-  article {
-    width: calc(100% - 48px);
-    box-shadow: 0 50px 25px rgba(0, 0, 0, 0.1);
-    text-align: center;
-  }
-
-  article p {
-    line-height: 1;
-  }
-
-  article h5 {
-    line-height: 1;
-    letter-spacing: -0.25px;
   }
 }
 
