@@ -17,6 +17,9 @@ export default defineConfig({
     command: `npm run dev -- --port ${port} --strictPort`,
     url: `http://localhost:${port}`,
     reuseExistingServer: true,
+    // The ipify API is stubbed in the fixtures, but the app still refuses to
+    // request anything without a key, so give the test server a stub one.
+    env: { VITE_IPIFY_API_KEY: "e2e-test-key" },
   },
   projects: [
     {
