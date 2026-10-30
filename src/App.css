@@ -252,7 +252,7 @@ main {
     flex: 1 1 0;
   }
 
-  .info-item + .info-item::before {
+  .info-item+.info-item::before {
     content: "";
   }
 
