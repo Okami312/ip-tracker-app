@@ -121,19 +121,51 @@ main {
 
 .error-message {
   position: absolute;
-  top: calc(100% + 2px);
+  z-index: 2;
+  top: calc(100% + 6px);
+  right: 0;
   left: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: fit-content;
   max-width: 100%;
   box-sizing: border-box;
-  margin: 0;
-  padding: 3px 10px;
-  border-radius: 8px;
+  margin: 0 auto;
+  padding: 7px 16px 7px 12px;
+  border-radius: 12px;
   background-color: #fff;
-  color: #d93025;
-  font-size: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  color: #c5221f;
+  font-size: 15px;
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1.3;
   text-align: left;
+  animation: error-in 0.18s ease-out;
+}
+
+.error-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 0.5px;
+}
+
+@keyframes error-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .error-message {
+    animation: none;
+  }
+
+  .input-search {
+    transition: none;
+  }
 }
 
 @media (min-width: 768px) {
@@ -310,6 +342,18 @@ main {
   }
 }
 
+/* Tablets only have a 24px gap above the info card: open it up to the
+   desktop gap while an error is shown so the pill doesn't sit on the card. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .input-search {
+    transition: margin-bottom 0.18s ease-out;
+  }
+
+  .input-search:has(.error-message) {
+    margin-bottom: 48px;
+  }
+}
+
 @media (max-width: 767px) {
   main {
     max-width: none;
@@ -326,6 +370,13 @@ main {
     width: calc(100% - 48px);
     margin-bottom: 24px;
     border-radius: 15px;
+    transition: margin-bottom 0.18s ease-out;
+  }
+
+  /* The 24px gap is too small for the pill on phones, where messages often
+     wrap to two lines: push the info card down while an error is shown. */
+  .input-search:has(.error-message) {
+    margin-bottom: 72px;
   }
 
   .search-btn {

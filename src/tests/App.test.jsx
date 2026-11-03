@@ -65,6 +65,24 @@ describe("App", () => {
     expect(screen.getByTestId("map")).toHaveTextContent("10,20");
   });
 
+  it("shows a setup error and skips the request when the API key is missing", async () => {
+    const apiKey = process.env.VITE_IPIFY_API_KEY;
+    delete process.env.VITE_IPIFY_API_KEY;
+    try {
+      render(<App />);
+
+      expect(
+        await screen.findByText(
+          "Missing API key. Set VITE_IPIFY_API_KEY in your .env file and restart the dev server.",
+        ),
+      ).toBeInTheDocument();
+      expect(fetch).not.toHaveBeenCalled();
+      expect(screen.getByRole("button", { name: "Search" })).toBeEnabled();
+    } finally {
+      process.env.VITE_IPIFY_API_KEY = apiKey;
+    }
+  });
+
   it("searches by ipAddress for an IPv4 query", async () => {
     render(<App />);
     await screen.findByText("1.1.1.1");
